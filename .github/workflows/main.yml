@@ -1,10 +1,9 @@
 name: Daily Integration Workflow
 
 on:
-  schedule:
-    # This runs the workflow every day at midnight
-    - cron: "0 0 * * *"
-
+  push:
+    branches:
+      - main  # Triggers the workflow on push to the main branch
 jobs:
   create-integration-branch:
     runs-on: ubuntu-latest
@@ -12,26 +11,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Set up Git config
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
       - name: Create integration branch
         run: |
-          git checkout release
-          git pull origin release
+          git checkout main
+          git pull origin main
           git checkout -b qa-integration-$(date +%Y%m%d)
           git push origin qa-integration-$(date +%Y%m%d)
-
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token is used for authentication
   cherry-pick-mrs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Cherry-pick merge requests
+      - name: Cherry-pick merge requests(MRs)
         run: |
           for pr in $(gh pr list --label "QA Ready" --json number --jq '.[].number'); do
               git cherry-pick $(gh pr view $pr --json commits --jq '.commits[0].oid')
           done
           git push origin qa-integration-$(date +%Y%m%d)
-
   deploy-to-qa:
     runs-on: ubuntu-latest
     steps:
