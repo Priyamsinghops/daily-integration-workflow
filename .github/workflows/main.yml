@@ -25,7 +25,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Cherry-pick merge requests
+      - name: Cherry-pick merge requests(MRs)
         run: |
           for pr in $(gh pr list --label "QA Ready" --json number --jq '.[].number'); do
               git cherry-pick $(gh pr view $pr --json commits --jq '.commits[0].oid')
