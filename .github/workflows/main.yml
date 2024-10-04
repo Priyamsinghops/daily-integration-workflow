@@ -17,6 +17,8 @@ jobs:
           git pull origin main
           git checkout -b qa-integration-$(date +%Y%m%d)
           git push origin qa-integration-$(date +%Y%m%d)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token is used for authentication
 
   cherry-pick-mrs:
     runs-on: ubuntu-latest
