@@ -14,8 +14,8 @@ jobs:
 
       - name: Create integration branch
         run: |
-          git checkout release
-          git pull origin release
+          git checkout main
+          git pull origin main
           git checkout -b qa-integration-$(date +%Y%m%d)
           git push origin qa-integration-$(date +%Y%m%d)
 
