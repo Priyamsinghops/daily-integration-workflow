@@ -1,0 +1,39 @@
+name: Daily Integration Workflow
+
+on:
+  schedule:
+    # This runs the workflow every day at midnight
+    - cron: "0 0 * * *"
+
+jobs:
+  create-integration-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Create integration branch
+        run: |
+          git checkout release
+          git pull origin release
+          git checkout -b qa-integration-$(date +%Y%m%d)
+          git push origin qa-integration-$(date +%Y%m%d)
+
+  cherry-pick-mrs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Cherry-pick merge requests
+        run: |
+          for pr in $(gh pr list --label "QA Ready" --json number --jq '.[].number'); do
+              git cherry-pick $(gh pr view $pr --json commits --jq '.commits[0].oid')
+          done
+          git push origin qa-integration-$(date +%Y%m%d)
+
+  deploy-to-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to QA
+        run: ./deploy-to-qa.sh qa-integration-$(date +%Y%m%d)
