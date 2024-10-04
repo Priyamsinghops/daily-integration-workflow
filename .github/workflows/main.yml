@@ -1,5 +1,4 @@
 name: Daily Integration Workflow
-
 on:
   push:
     branches:
