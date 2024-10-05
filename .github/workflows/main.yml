@@ -34,6 +34,8 @@ jobs:
               git cherry-pick $(gh pr view $pr --json commits --jq '.commits[0].oid')
           done
           git push origin qa-integration-$(date +%Y%m%d)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token is used for authentication
   deploy-to-qa:
     runs-on: ubuntu-latest
     steps:
